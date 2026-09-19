@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invitations — Making Invitations</title>
+<style>
+:root {
+  --primary: #6C5CE7;
+  --primary-light: #A29BFE;
+  --secondary: #00CEC9;
+  --accent: #FD79A8;
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --danger: #E17055;
+  --bg: #F0F3FF;
+  --card-bg: #FFFFFF;
+  --text: #2D3436;
+  --text-light: #636E72;
+  --border-radius: 16px;
+  --shadow: 0 4px 16px rgba(108,92,231,0.12);
+  --font-size-base: 16px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+.container { max-width: 720px; margin: 0 auto; padding: 16px; min-height: 100vh; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+@keyframes popIn { 0%{transform:scale(0.8);opacity:0} 100%{transform:scale(1);opacity:1} }
+.shake { animation: shake 0.4s ease; }
+.pop-in { animation: popIn 0.3s ease; }
+
+.header { text-align: center; padding: 24px 16px 16px; }
+.header h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 4px; }
+.header .subtitle { color: var(--text-light); font-size: 1rem; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px; border: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s ease; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: #5A4BD6; }
+.btn-secondary { background: var(--secondary); color: #fff; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-warning { background: var(--warning); color: var(--text); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-sm { padding: 8px 16px; font-size: 0.9rem; border-radius: 10px; }
+.btn-lg { padding: 16px 32px; font-size: 1.1rem; }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.speak-btn {
+  background: none; border: 2px solid var(--primary-light); border-radius: 50%;
+  width: 40px; height: 40px; display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.2rem; transition: all 0.2s; flex-shrink: 0;
+}
+.speak-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.card {
+  background: var(--card-bg); border-radius: var(--border-radius);
+  padding: 20px; margin-bottom: 12px; box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-2px); }
+
+.level-card {
+  display: flex; align-items: center; gap: 16px; padding: 20px;
+  cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+}
+.level-card:hover { border-color: var(--primary-light); }
+.level-card .level-num {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 700; flex-shrink: 0;
+}
+.level-card .level-info { flex: 1; }
+.level-card .level-name { font-weight: 700; font-size: 1.05rem; }
+.level-card .level-desc { font-size: 0.85rem; color: var(--text-light); }
+.stars { display: flex; gap: 2px; font-size: 1.1rem; }
+.star { color: #ddd; }
+.star.filled { color: var(--warning); }
+
+.phrase-card { display: flex; align-items: flex-start; gap: 12px; padding: 16px; }
+.phrase-card .emoji { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+.phrase-card .phrase-text { font-weight: 600; font-size: 1.05rem; }
+.phrase-card .phrase-translation { color: var(--text-light); font-size: 0.9rem; margin-top: 2px; }
+.toggle-translation {
+  background: none; border: none; color: var(--primary);
+  cursor: pointer; font-size: 0.85rem; text-decoration: underline; padding: 2px 0;
+}
+
+.quiz-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
+}
+.progress-bar-container {
+  width: 100%; height: 8px; background: #e0e0e0;
+  border-radius: 4px; overflow: hidden; margin-bottom: 16px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 4px; transition: width 0.4s ease;
+}
+.counter { font-weight: 600; color: var(--primary); font-size: 0.95rem; }
+.score-display { font-weight: 600; color: var(--success); font-size: 0.95rem; }
+
+.question-area { text-align: center; margin-bottom: 20px; }
+.question-prompt { font-size: 1.1rem; color: var(--text-light); margin-bottom: 12px; }
+.main-phrase { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 12px 0; word-break: break-word; }
+.main-translation { font-size: 1.1rem; color: var(--text-light); margin: 8px 0; }
+
+.options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.option-btn {
+  padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 12px;
+  background: #fff; font-size: 1rem; cursor: pointer; text-align: left;
+  transition: all 0.2s; word-break: break-word;
+}
+.option-btn:hover:not(.disabled) { border-color: var(--primary); background: #f8f7ff; }
+.option-btn.correct { border-color: var(--success); background: #e6fff8; color: var(--success); font-weight: 600; }
+.option-btn.wrong { border-color: var(--danger); background: #fff0ee; color: var(--danger); font-weight: 600; }
+.option-btn.disabled { cursor: default; }
+.option-btn .option-icon { float: right; font-size: 1.2rem; }
+
+.gap-sentence {
+  font-size: 1.3rem; font-weight: 600; margin: 16px 0;
+  line-height: 2; word-break: break-word;
+}
+.gap-blank {
+  display: inline-block; min-width: 80px;
+  border-bottom: 3px dashed var(--primary);
+  padding: 2px 8px; color: var(--primary);
+  margin: 0 4px; text-align: center; vertical-align: baseline;
+}
+.gap-blank.filled { border-bottom-style: solid; color: var(--success); }
+.gap-blank.wrong-fill { border-bottom-color: var(--danger); color: var(--danger); }
+.word-options {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-top: 16px;
+}
+.word-option {
+  padding: 10px 20px; border: 2px solid var(--primary-light);
+  border-radius: 10px; background: #fff; font-size: 1rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.word-option:hover:not(.used):not(.disabled) { background: var(--primary); color: #fff; }
+.word-option.used { opacity: 0.3; cursor: default; pointer-events: none; }
+.word-option.disabled { cursor: default; }
+
+.dictation-input-area { margin: 16px 0; }
+.dictation-input {
+  width: 100%; padding: 14px 16px; border: 2px solid #ddd;
+  border-radius: 12px; font-size: 1.1rem; outline: none;
+  transition: border-color 0.2s; font-family: inherit;
+}
+.dictation-input:focus { border-color: var(--primary); }
+.dictation-input.correct-input { border-color: var(--success); background: #e6fff8; }
+.dictation-input.wrong-input { border-color: var(--danger); background: #fff0ee; }
+
+.tiles-area {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin: 16px 0; min-height: 50px; padding: 12px;
+  border: 2px dashed #ddd; border-radius: 12px;
+}
+.tile {
+  padding: 8px 14px; background: var(--primary); color: #fff;
+  border-radius: 8px; font-size: 1rem; cursor: pointer;
+  user-select: none; transition: all 0.2s;
+}
+.tile:hover { background: #5A4BD6; transform: scale(1.05); }
+.tile.in-answer { background: var(--secondary); }
+.source-tiles {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center; margin-top: 12px;
+}
+.source-tile {
+  padding: 8px 14px; background: #eee; color: var(--text);
+  border-radius: 8px; font-size: 1rem; cursor: pointer;
+  user-select: none; transition: all 0.2s; border: 2px solid transparent;
+}
+.source-tile:hover { border-color: var(--primary); }
+.source-tile.placed { opacity: 0.3; cursor: default; pointer-events: none; }
+
+.dictation-controls { display: flex; gap: 8px; justify-content: center; margin: 12px 0; flex-wrap: wrap; }
+.hint-text { color: var(--primary); font-size: 0.9rem; margin-top: 8px; }
+
+.context-dialogue {
+  background: #f8f9fa; border-radius: 12px; padding: 16px;
+  margin: 16px 0; line-height: 2;
+}
+.dialogue-line { margin: 6px 0; font-size: 1.05rem; }
+.dialogue-speaker { font-weight: 700; color: var(--primary); margin-right: 6px; }
+.dialogue-gap {
+  display: inline; background: #fff3cd;
+  border-bottom: 2px dashed var(--warning);
+  padding: 2px 12px; border-radius: 4px; font-weight: 600; color: var(--warning);
+}
+.dialogue-gap.filled { background: #d4edda; border-bottom-color: var(--success); color: var(--success); }
+.context-translation-toggle { margin-top: 12px; text-align: center; }
+
+.feedback {
+  text-align: center; padding: 16px; border-radius: 12px;
+  margin: 16px 0; font-weight: 600; font-size: 1.05rem;
+  animation: popIn 0.3s ease;
+}
+.feedback.correct-fb { background: #e6fff8; color: var(--success); }
+.feedback.wrong-fb { background: #fff0ee; color: var(--danger); }
+.feedback .fb-icon { font-size: 1.4rem; margin-right: 6px; }
+
+.next-btn-area { text-align: center; margin-top: 16px; }
+
+.results-screen { text-align: center; padding: 32px 16px; }
+.results-stars { font-size: 3rem; margin: 16px 0; }
+.results-score { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin: 8px 0; }
+.results-message { font-size: 1.1rem; color: var(--text-light); margin: 8px 0 24px; }
+.results-buttons { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
+
+.nav-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; margin-bottom: 8px;
+}
+.back-btn {
+  background: none; border: none; color: var(--primary);
+  font-size: 1rem; cursor: pointer; font-weight: 600; padding: 8px;
+}
+.back-btn:hover { text-decoration: underline; }
+
+.section-title {
+  font-size: 1.3rem; font-weight: 700; color: var(--primary);
+  margin: 24px 0 12px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+@media (max-width: 480px) {
+  .container { padding: 10px; }
+  .header h1 { font-size: 1.4rem; }
+  .main-phrase { font-size: 1.2rem; }
+  .gap-sentence { font-size: 1.1rem; }
+  .btn { padding: 10px 18px; font-size: 0.95rem; }
+  .level-card { padding: 14px; }
+  .card { padding: 14px; }
+}
+@media (min-width: 768px) {
+  .options-grid { grid-template-columns: 1fr 1fr; }
+}
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.mt-2 { margin-top: 16px; }
+.mb-2 { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div id="page-menu" class="page active">
+  <div class="header">
+    <h1>🎉 Making Invitations</h1>
+    <p class="subtitle">Приглашения — учимся приглашать и отвечать</p>
+  </div>
+  <div class="section-title"> Уровни</div>
+  <div id="levels-list"></div>
+  <div class="section-title">💬 Фразы</div>
+  <button class="btn btn-outline btn-sm mb-2" onclick="toggleAllTranslations()">Показать все переводы</button>
+  <button class="btn btn-secondary btn-sm mb-2" onclick="speakAllPhrases()" style="margin-left:8px;"> Озвучить все подряд</button>
+  <div id="phrases-list"></div>
+</div>
+
+<div id="page-level" class="page">
+  <div class="nav-bar">
+    <button class="back-btn" onclick="goToMenu()">← Меню</button>
+    <span id="level-title" style="font-weight:700;color:var(--primary);"></span>
+    <span></span>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="quiz-header">
+    <span class="counter" id="quiz-counter">1 / 10</span>
+    <span class="score-display" id="quiz-score">✅ 0</span>
+  </div>
+  <div id="quiz-area"></div>
+</div>
+
+<div id="page-results" class="page">
+  <div class="results-screen">
+    <h2 style="color:var(--primary);font-size:1.6rem;" id="results-title">Уровень пройден!</h2>
+    <div class="results-stars" id="results-stars"></div>
+    <div class="results-score" id="results-score"></div>
+    <div class="results-message" id="results-message"></div>
+    <div class="results-buttons">
+      <button class="btn btn-primary btn-lg btn-block" onclick="retryLevel()"> Пройти ещё раз</button>
+      <button class="btn btn-secondary btn-lg btn-block" id="next-level-btn" onclick="goNextLevel()">️ Следующий уровень</button>
+      <button class="btn btn-outline btn-lg btn-block" onclick="goToMenu()">🏠 В меню</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ================================================================
+   📦 ДАННЫЕ: ФРАЗЫ И КОНТЕКСТЫ
+   ================================================================
+   КАК ДОБАВИТЬ НОВУЮ ФРАЗУ:
+   1. Скопируйте объект из массива ниже.
+   2. Заполните поля:
+      - phrase: целевая фраза на английском
+      - translation: естественный перевод на русский
+      - emoji: эмодзи для иллюстрации (необязательно)
+      - context.type: "dialogue" или "text"
+      - context.lines: массив реплик [{speaker:"A", text:"..."}, ...]
+        Для типа "text": [{speaker:"", text:"..."}]
+      - context.gapIndex: номер реплики/предложения (с 0), где стоит целевая фраза
+   3. Вставьте объект в массив phrases.
+   ================================================================ */
+
+const phrases = [
+  {
+    phrase: "Mum's taking us to the adventure park on Saturday.",
+    translation: "Мама ведёт нас в парк приключений в субботу.",
+    emoji: "",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Hey! Guess what?" },
+        { speaker: "B", text: "What?" },
+        { speaker: "A", text: "Mum's taking us to the adventure park on Saturday." },
+        { speaker: "B", text: "Wow, that sounds awesome!" }
+      ],
+      gapIndex: 2
+    }
+  },
+  {
+    phrase: "Can you come?",
+    translation: "Ты сможешь прийти?",
+    emoji: "🤔",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "We're going to the cinema on Friday." },
+        { speaker: "A", text: "Can you come?" },
+        { speaker: "B", text: "Yes, I'd love to!" }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "Are you free on Sunday?",
+    translation: "Ты свободен в воскресенье?",
+    emoji: "",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Hi Tom! Are you free on Sunday?" },
+        { speaker: "B", text: "Yes, I am. Why?" },
+        { speaker: "A", text: "Let's play football together!" }
+      ],
+      gapIndex: 0
+    }
+  },
+  {
+    phrase: "Would you like to hang out?",
+    translation: "Хочешь потусоваться вместе?",
+    emoji: "🎈",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "I have no plans this afternoon." },
+        { speaker: "A", text: "Would you like to hang out?" },
+        { speaker: "B", text: "Sure! Let's go to the park." }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "Do you want to hang out on Sunday?",
+    translation: "Хочешь потусоваться в воскресенье?",
+    emoji: "🗓️",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Hey! Do you want to hang out on Sunday?" },
+        { speaker: "B", text: "That sounds great! What time?" },
+        { speaker: "A", text: "At two o'clock, at the café." }
+      ],
+      gapIndex: 0
+    }
+  },
+  {
+    phrase: "That sounds fun!",
+    translation: "Звучит весело!",
+    emoji: "🎉",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "We're going ice skating on Saturday." },
+        { speaker: "B", text: "That sounds fun! Can I come too?" },
+        { speaker: "A", text: "Of course! See you there!" }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "That sounds great.",
+    translation: "Звучит здорово.",
+    emoji: "",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Let's go to the new pizza place after school." },
+        { speaker: "B", text: "That sounds great. Thank you." },
+        { speaker: "A", text: "Perfect! See you at three." }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "Yes, I'd love to, thanks.",
+    translation: "Да, с удовольствием, спасибо.",
+    emoji: "😊",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Would you like to come to my birthday party?" },
+        { speaker: "B", text: "Yes, I'd love to, thanks." },
+        { speaker: "A", text: "It's next Saturday at four." }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "I'm sorry, I can't. I'm busy on Saturday.",
+    translation: "Извини, не могу. Я занят в субботу.",
+    emoji: "😔",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Do you want to come to the swimming pool on Saturday?" },
+        { speaker: "B", text: "I'm sorry, I can't. I'm busy on Saturday." },
+        { speaker: "A", text: "Oh, maybe next time then." }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "I'd love to, but we're visiting our cousins this Saturday.",
+    translation: "Я бы с радостью, но мы едем к двоюродным в эту субботу.",
+    emoji: "👨‍👩‍‍👦",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "We're having a picnic in the park this Saturday. Want to join?" },
+        { speaker: "B", text: "I'd love to, but we're visiting our cousins this Saturday." },
+        { speaker: "A", text: "No problem! Maybe another day." }
+      ],
+      gapIndex: 1
+    }
+  },
+  {
+    phrase: "Sorry, maybe next time.",
+    translation: "Извини, может быть в следующий раз.",
+    emoji: "🙏",
+    context: {
+      type: "dialogue",
+      lines: [
+        { speaker: "A", text: "Are you coming to the game tonight?" },
+        { speaker: "B", text: "Sorry, maybe next time. I have homework." },
+        { speaker: "A", text: "OK, no worries!" }
+      ],
+      gapIndex: 1
+    }
+  }
+];
+
+/* ================================================================
+   🔧 НАСТРОЙКИ
+   ================================================================ */
+const STUDENT_AGE = 12;
+const IS_YOUNG = STUDENT_AGE < 10;
+
+const LEVELS = [
+  { id: 1, name: "Фраза → Перевод", desc: "Выбери правильный перевод", icon: "1️⃣" },
+  { id: 2, name: "Перевод → Фраза", desc: "Выбери правильную фразу", icon: "2️⃣" },
+  { id: 3, name: "Пропущенное слово", desc: "Вставь пропущенное слово", icon: "3️⃣" },
+  { id: 4, name: "Диктант", desc: IS_YOUNG ? "Собери фразу из слов" : "Напиши фразу по слуху", icon: "4️⃣" },
+  { id: 5, name: "Фраза в контексте", desc: "Выбери фразу для диалога", icon: "5️" }
+];
+
+/* ================================================================
+   🌐 СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+   ================================================================ */
+let currentLevel = null;
+let currentQuestions = [];
+let questionIndex = 0;
+let correctCount = 0;
+let retryQueue = [];
+let showTranslation = {};
+let dictationHintShown = false;
+let answered = false;
+
+/* ================================================================
+   💾 LOCALSTORAGE
+   ================================================================ */
+function saveProgress(data) {
+  try { localStorage.setItem('invitations_progress', JSON.stringify(data)); } catch(e) {}
+}
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem('invitations_progress')) || {}; } catch(e) { return {}; }
+}
+function getStars(levelId) {
+  const p = loadProgress();
+  return p[levelId] || 0;
+}
+function setStars(levelId, stars) {
+  const p = loadProgress();
+  if (!p[levelId] || p[levelId] < stars) {
+    p[levelId] = stars;
+    saveProgress(p);
+  }
+}
+
+/* ================================================================
+   🔊 SPEECH SYNTHESIS
+   ================================================================ */
+let synth = window.speechSynthesis;
+let voiceEn = null;
+
+function loadVoices() {
+  try {
+    let voices = synth.getVoices();
+    if (voices.length === 0) return;
+    voiceEn = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
+           || voices.find(v => v.lang.startsWith('en-US'))
+           || voices.find(v => v.lang.startsWith('en'));
+  } catch(e) {}
+}
+if (synth) {
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+}
+
+function speak(text, rate) {
+  if (!synth) { alert('Озвучка не поддерживается вашим браузером.'); return; }
+  synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = rate || (IS_YOUNG ? 0.7 : 0.85);
+  if (voiceEn) utterance.voice = voiceEn;
+  try { synth.speak(utterance); } catch(e) {}
+}
+
+function speakDialogue(lines) {
+  if (!synth) return;
+  let delay = 0;
+  lines.forEach((line) => {
+    setTimeout(() => { speak(line.text, IS_YOUNG ? 0.7 : 0.85); }, delay);
+    delay += (line.text.split(' ').length * 400 + 800);
+  });
+}
+
+/* ================================================================
+   🛠️ УТИЛИТЫ
+   ================================================================ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getRandomDistractors(correctIndex, count) {
+  const indices = [];
+  while (indices.length < count) {
+    const r = Math.floor(Math.random() * phrases.length);
+    if (r !== correctIndex && !indices.includes(r)) indices.push(r);
+  }
+  return indices;
+}
+
+function normalizeText(t) {
+  return t.toLowerCase().trim().replace(/['']/g, "'").replace(/[.,!?;:]+$/g, '').replace(/\s+/g, ' ');
+}
+
+function calculateStars(correct, total) {
+  const pct = correct / total;
+  if (pct >= 0.9) return 3;
+  if (pct >= 0.6) return 2;
+  return 1;
+}
+
+function getEncouragement(correct) {
+  const msgs = correct ? ["Отлично! ", "Правильно! 👏", "Молодец! ⭐", "Верно! ✅", "Супер! 🌟"]
+                       : ["Не совсем, попробуй ещё! ", "Почти! Не сдавайся! 😊", "Ничего страшного! 📚", "Бывает! Давай дальше! 🚀"];
+  return msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+/* ================================================================
+   🏠 ГЛАВНОЕ МЕНЮ
+   ================================================================ */
+function renderMenu() {
+  const levelsList = document.getElementById('levels-list');
+  levelsList.innerHTML = '';
+  LEVELS.forEach(lvl => {
+    const stars = getStars(lvl.id);
+    const card = document.createElement('div');
+    card.className = 'card level-card';
+    card.onclick = () => startLevel(lvl.id);
+    card.innerHTML = `
+      <div class="level-num">${lvl.icon}</div>
+      <div class="level-info">
+        <div class="level-name">Уровень ${lvl.id}: ${lvl.name}</div>
+        <div class="level-desc">${lvl.desc}</div>
+      </div>
+      <div class="stars">
+        ${[1,2,3].map(s => `<span class="star ${s <= stars ? 'filled' : ''}">★</span>`).join('')}
+      </div>
+    `;
+    levelsList.appendChild(card);
+  });
+
+  const phrasesList = document.getElementById('phrases-list');
+  phrasesList.innerHTML = '';
+  phrases.forEach((p, i) => {
+    const showTr = showTranslation[i] || false;
+    const card = document.createElement('div');
+    card.className = 'card phrase-card';
+    card.innerHTML = `
+      <div class="emoji">${p.emoji || '💬'}</div>
+      <div style="flex:1">
+        <div class="phrase-text">${p.phrase}</div>
+        <div class="phrase-translation ${showTr ? '' : 'hidden'}" id="trans-${i}">${p.translation}</div>
+        <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="speak-btn" onclick="event.stopPropagation();speak(\`${p.phrase.replace(/`/g,'')}\`)" title="Озвучить">🔊</button>
+          <button class="toggle-translation" onclick="event.stopPropagation();toggleTranslation(${i})">${showTr ? 'Скрыть перевод' : 'Показать перевод'}</button>
+        </div>
+      </div>
+    `;
+    phrasesList.appendChild(card);
+  });
+}
+
+function toggleTranslation(index) {
+  showTranslation[index] = !showTranslation[index];
+  renderMenu();
+}
+function toggleAllTranslations() {
+  const allVisible = phrases.every((_, i) => showTranslation[i]);
+  phrases.forEach((_, i) => showTranslation[i] = !allVisible);
+  renderMenu();
+}
+async function speakAllPhrases() {
+  for (let i = 0; i < phrases.length; i++) {
+    speak(phrases[i].phrase, IS_YOUNG ? 0.7 : 0.85);
+    await new Promise(r => setTimeout(r, 2200));
+  }
+}
+
+/* ================================================================
+   🎮 ЗАПУСК УРОВНЯ
+   ================================================================ */
+function startLevel(levelId) {
+  currentLevel = levelId;
+  correctCount = 0;
+  questionIndex = 0;
+  retryQueue = [];
+  dictationHintShown = false;
+  answered = false;
+
+  const indices = shuffle([...Array(phrases.length).keys()]);
+  currentQuestions = indices.map(i => ({ phraseIndex: i }));
+
+  showPage('page-level');
+  document.getElementById('level-title').textContent = `Уровень ${levelId}: ${LEVELS[levelId-1].name}`;
+  updateProgress();
+  renderQuestion();
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goToMenu() { showPage('page-menu'); renderMenu(); }
+
+function updateProgress() {
+  const total = currentQuestions.length + retryQueue.length;
+  const done = questionIndex;
+  const pct = total > 0 ? (done / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('quiz-counter').textContent = `${Math.min(done + 1, total)} / ${total}`;
+  document.getElementById('quiz-score').textContent = `✅ ${correctCount}`;
+}
+
+/* ================================================================
+    РЕНДЕР ВОПРОСА
+   ================================================================ */
+function renderQuestion() {
+  answered = false;
+  dictationHintShown = false;
+  updateProgress();
+
+  if (questionIndex >= currentQuestions.length) {
+    if (retryQueue.length > 0) {
+      currentQuestions.push(...retryQueue);
+      retryQueue = [];
+    } else {
+      showResults();
+      return;
+    }
+  }
+
+  const q = currentQuestions[questionIndex];
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '';
+
+  switch(currentLevel) {
+    case 1: renderLevel1(q, area); break;
+    case 2: renderLevel2(q, area); break;
+    case 3: renderLevel3(q, area); break;
+    case 4: renderLevel4(q, area); break;
+    case 5: renderLevel5(q, area); break;
+  }
+}
+
+/* ---------- LEVEL 1 ---------- */
+function renderLevel1(q, area) {
+  const phrase = phrases[q.phraseIndex];
+  const distractors = getRandomDistractors(q.phraseIndex, 3);
+  const options = shuffle([
+    { text: phrase.translation, correct: true },
+    ...distractors.map(d => ({ text: phrases[d].translation, correct: false }))
+  ]);
+  area.innerHTML = `
+    <div class="question-area">
+      <div class="question-prompt">Выбери правильный перевод:</div>
+      <div class="main-phrase">${phrase.emoji || ''} ${phrase.phrase}</div>
+      <button class="speak-btn" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`)" style="margin:8px auto;display:flex;">🔊</button>
+    </div>
+    <div class="options-grid">
+      ${options.map(o => `<button class="option-btn" data-correct="${o.correct}" onclick="checkOption(this, ${q.phraseIndex})">${o.text}</button>`).join('')}
+    </div>
+    <div id="feedback-area"></div>
+    <div class="next-btn-area hidden" id="next-btn-area">
+      <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+    </div>
+  `;
+}
+
+/* ---------- LEVEL 2 ---------- */
+function renderLevel2(q, area) {
+  const phrase = phrases[q.phraseIndex];
+  const distractors = getRandomDistractors(q.phraseIndex, 3);
+  const options = shuffle([
+    { text: phrase.phrase, correct: true },
+    ...distractors.map(d => ({ text: phrases[d].phrase, correct: false }))
+  ]);
+  area.innerHTML = `
+    <div class="question-area">
+      <div class="question-prompt">Выбери правильную фразу:</div>
+      <div class="main-translation">${phrase.emoji || ''} ${phrase.translation}</div>
+    </div>
+    <div class="options-grid">
+      ${options.map(o => `<button class="option-btn" data-correct="${o.correct}" onclick="checkOption(this, ${q.phraseIndex})">${o.text}</button>`).join('')}
+    </div>
+    <div id="feedback-area"></div>
+    <div class="next-btn-area hidden" id="next-btn-area">
+      <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+    </div>
+  `;
+}
+
+/* ---------- LEVEL 3: ПРОПУЩЕННОЕ СЛОВО (ИСПРАВЛЕНО) ---------- */
+function renderLevel3(q, area) {
+  const phrase = phrases[q.phraseIndex];
+  const words = phrase.phrase.split(/\s+/);
+
+  // Выбираем значимые слова для пропуска (не короткие предлоги/артикли)
+  const skipWords = ['a','an','the','to','on','in','at','of','and','but','I','I\'m'];
+  let candidates = [];
+  words.forEach((w, i) => {
+    const clean = w.replace(/[^a-zA-Z']/g, '');
+    if (clean.length > 2 && !skipWords.includes(clean) && !skipWords.includes(clean.toLowerCase())) {
+      candidates.push(i);
+    }
+  });
+  if (candidates.length === 0) candidates = words.map((_, i) => i).filter(i => words[i].length > 2);
+
+  // 1 пропуск для коротких фраз, 2 для длинных
+  const numGaps = Math.min(words.length > 8 ? 2 : 1, candidates.length);
+  const gapPositions = shuffle(candidates).slice(0, numGaps).sort((a,b) => a-b);
+
+  // Строим предложение с пропусками
+  let sentenceHTML = '';
+  words.forEach((w, i) => {
+    const gapIdx = gapPositions.indexOf(i);
+    if (gapIdx !== -1) {
+      sentenceHTML += `<span class="gap-blank" id="gap-${gapIdx}" data-answer="${w.replace(/"/g,'&quot;')}">______</span> `;
+    } else {
+      sentenceHTML += w + ' ';
+    }
+  });
+
+  // Слова-варианты: правильные + дистракторы из других фраз
+  const correctWords = gapPositions.map(p => words[p]);
+  const allOtherWords = [];
+  phrases.forEach((p, pi) => {
+    if (pi !== q.phraseIndex) {
+      p.phrase.split(/\s+/).forEach(w => {
+        const clean = w.replace(/[^a-zA-Z']/g, '');
+        if (clean.length > 2) allOtherWords.push(w);
+      });
+    }
+  });
+  const distractorWords = shuffle([...new Set(allOtherWords)]).slice(0, 4);
+  const wordOptions = shuffle([...correctWords, ...distractorWords]);
+
+  area.innerHTML = `
+    <div class="question-area">
+      <div class="question-prompt">Вставь пропущенное слово:</div>
+      <div class="gap-sentence" id="gap-sentence">${sentenceHTML}</div>
+      <div class="main-translation" style="font-size:0.95rem;"> ${phrase.translation}</div>
+      <button class="speak-btn" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`)" style="margin:8px auto;display:flex;" title="Озвучить полную фразу">🔊</button>
+    </div>
+    <div class="word-options" id="word-options">
+      ${wordOptions.map((w, i) => `<button class="word-option" data-word="${w.replace(/"/g,'&quot;')}" onclick="fillGap(this, '${w.replace(/'/g,"\\'")}')">${w}</button>`).join('')}
+    </div>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="btn btn-outline btn-sm" onclick="resetGaps()">🔄 Сбросить</button>
+    </div>
+    <div id="feedback-area"></div>
+    <div class="next-btn-area hidden" id="next-btn-area">
+      <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+    </div>
+  `;
+
+  area.dataset.gapTotal = gapPositions.length;
+  area.dataset.gapFilled = 0;
+  area.dataset.gapPositions = JSON.stringify(gapPositions);
+}
+
+function fillGap(btn, word) {
+  if (answered || btn.classList.contains('used')) return;
+  const area = document.getElementById('quiz-area');
+  const filled = parseInt(area.dataset.gapFilled);
+  const total = parseInt(area.dataset.gapTotal);
+  const gapEl = document.getElementById('gap-' + filled);
+  if (!gapEl) return;
+
+  const answer = gapEl.dataset.answer;
+  const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase();
+  const cleanAnswer = answer.replace(/[^a-zA-Z']/g, '').toLowerCase();
+
+  if (cleanWord === cleanAnswer) {
+    // Правильно — вставляем слово
+    gapEl.textContent = word;
+    gapEl.classList.add('filled');
+    btn.classList.add('used');
+    area.dataset.gapFilled = filled + 1;
+
+    if (filled + 1 >= total) {
+      // Все пропуски заполнены верно
+      correctCount++;
+      const fbArea = document.getElementById('feedback-area');
+      fbArea.innerHTML = `<div class="feedback correct-fb"><span class="fb-icon">✅</span> ${getEncouragement(true)}</div>`;
+      answered = true;
+      // Блокируем все кнопки слов
+      document.querySelectorAll('.word-option').forEach(b => b.classList.add('disabled'));
+      speak(phrases[currentQuestions[questionIndex].phraseIndex].phrase, IS_YOUNG ? 0.7 : 0.85);
+      document.getElementById('next-btn-area').classList.remove('hidden');
+    }
+  } else {
+    // Неправильно — тряска
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 400);
+  }
+}
+
+function resetGaps() {
+  if (answered) return;
+  const area = document.getElementById('quiz-area');
+  const total = parseInt(area.dataset.gapTotal);
+  for (let i = 0; i < total; i++) {
+    const gapEl = document.getElementById('gap-' + i);
+    if (gapEl) {
+      gapEl.textContent = '______';
+      gapEl.classList.remove('filled', 'wrong-fill');
+    }
+  }
+  area.dataset.gapFilled = 0;
+  document.querySelectorAll('.word-option').forEach(b => b.classList.remove('used'));
+}
+
+/* ---------- LEVEL 4: ДИКТАНТ ---------- */
+function renderLevel4(q, area) {
+  const phrase = phrases[q.phraseIndex];
+
+  if (IS_YOUNG) {
+    const words = phrase.phrase.split(/\s+/);
+    const shuffledWords = shuffle(words.map((w, i) => ({ word: w, origIndex: i })));
+    area.innerHTML = `
+      <div class="question-area">
+        <div class="question-prompt">🎧 Послушай фразу и собери её из слов:</div>
+        <button class="btn btn-secondary btn-sm" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`, 0.7)">🔊 Послушать</button>
+        <button class="btn btn-warning btn-sm" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`, 0.5)">🐢 Медленнее</button>
+        <button class="btn btn-outline btn-sm" onclick="showDictationHint(${q.phraseIndex})">💡 Подсказка</button>
+      </div>
+      <div class="hint-text hidden" id="dict-hint"></div>
+      <div class="tiles-area" id="answer-tiles"></div>
+      <div class="source-tiles" id="source-tiles">
+        ${shuffledWords.map((w, i) => `<div class="source-tile" data-index="${i}" data-word="${w.word.replace(/"/g,'&quot;')}" onclick="placeTile(this)">${w.word}</div>`).join('')}
+      </div>
+      <div class="dictation-controls">
+        <button class="btn btn-danger btn-sm" onclick="clearTiles()">🗑️ Стереть</button>
+        <button class="btn btn-outline btn-sm" onclick="resetTiles()">🔄 Начать заново</button>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <button class="btn btn-primary btn-lg" onclick="checkDictationTiles(${q.phraseIndex})">Проверить ✓</button>
+      </div>
+      <div id="feedback-area"></div>
+      <div class="next-btn-area hidden" id="next-btn-area">
+        <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+      </div>
+    `;
+  } else {
+    area.innerHTML = `
+      <div class="question-area">
+        <div class="question-prompt"> Послушай фразу и напиши её:</div>
+        <button class="btn btn-secondary btn-sm" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`, 0.85)">🔊 Послушать</button>
+        <button class="btn btn-warning btn-sm" onclick="speak(\`${phrase.phrase.replace(/`/g,'')}\`, 0.55)">🐢 Медленнее</button>
+        <button class="btn btn-outline btn-sm" onclick="showDictationHint(${q.phraseIndex})"> Подсказка</button>
+      </div>
+      <div class="hint-text hidden" id="dict-hint"></div>
+      <div class="dictation-input-area">
+        <input type="text" class="dictation-input" id="dict-input" placeholder="Напиши фразу здесь..." autocomplete="off" autocorrect="off" autocapitalize="off">
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <button class="btn btn-primary btn-lg" onclick="checkDictationTyped(${q.phraseIndex})">Проверить ✓</button>
+      </div>
+      <div id="feedback-area"></div>
+      <div class="next-btn-area hidden" id="next-btn-area">
+        <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+      </div>
+    `;
+    setTimeout(() => { const inp = document.getElementById('dict-input'); if (inp) inp.focus(); }, 300);
+  }
+}
+
+function showDictationHint(phraseIndex) {
+  dictationHintShown = true;
+  const hint = document.getElementById('dict-hint');
+  if (hint) {
+    const firstWord = phrases[phraseIndex].phrase.split(/\s+/)[0];
+    hint.textContent = `💡 Первое слово: "${firstWord}"`;
+    hint.classList.remove('hidden');
+  }
+}
+
+function placeTile(el) {
+  if (el.classList.contains('placed')) return;
+  el.classList.add('placed');
+  const answerArea = document.getElementById('answer-tiles');
+  const tile = document.createElement('div');
+  tile.className = 'tile in-answer';
+  tile.textContent = el.dataset.word;
+  tile.dataset.sourceIndex = el.dataset.index;
+  tile.onclick = () => removeTile(tile, el);
+  answerArea.appendChild(tile);
+}
+function removeTile(tile, sourceEl) { tile.remove(); sourceEl.classList.remove('placed'); }
+function clearTiles() {
+  const answerArea = document.getElementById('answer-tiles');
+  if (!answerArea) return;
+  answerArea.querySelectorAll('.tile').forEach(t => {
+    const si = t.dataset.sourceIndex;
+    const sourceEl = document.querySelector(`.source-tile[data-index="${si}"]`);
+    if (sourceEl) sourceEl.classList.remove('placed');
+    t.remove();
+  });
+}
+function resetTiles() { clearTiles(); }
+
+function checkDictationTiles(phraseIndex) {
+  if (answered) return;
+  const answerArea = document.getElementById('answer-tiles');
+  const tiles = answerArea.querySelectorAll('.tile');
+  const userWords = Array.from(tiles).map(t => t.textContent);
+  const correctWords = phrases[phraseIndex].phrase.split(/\s+/);
+  const isCorrect = userWords.length === correctWords.length &&
+    userWords.every((w, i) => normalizeText(w) === normalizeText(correctWords[i]));
+  handleDictationResult(isCorrect, phraseIndex, userWords.join(' '), correctWords.join(' '));
+}
+
+function checkDictationTyped(phraseIndex) {
+  if (answered) return;
+  const input = document.getElementById('dict-input');
+  const userText = input.value.trim();
+  const correctText = phrases[phraseIndex].phrase;
+  const isCorrect = normalizeText(userText) === normalizeText(correctText);
+  handleDictationResult(isCorrect, phraseIndex, userText, correctText);
+}
+
+function handleDictationResult(isCorrect, phraseIndex, userText, correctText) {
+  const feedbackArea = document.getElementById('feedback-area');
+  const nextArea = document.getElementById('next-btn-area');
+  if (isCorrect) {
+    correctCount++;
+    feedbackArea.innerHTML = `<div class="feedback correct-fb"><span class="fb-icon">✅</span> ${getEncouragement(true)}</div>`;
+    if (!IS_YOUNG) { const inp = document.getElementById('dict-input'); if (inp) inp.classList.add('correct-input'); }
+  } else {
+    feedbackArea.innerHTML = `
+      <div class="feedback wrong-fb"><span class="fb-icon">❌</span> ${getEncouragement(false)}</div>
+      <div style="margin-top:8px;font-size:0.95rem;">
+        Ты написал: <strong>${userText || '(пусто)'}</strong><br>
+        Правильно: <strong style="color:var(--success);">${correctText}</strong>
+      </div>
+    `;
+    if (!IS_YOUNG) { const inp = document.getElementById('dict-input'); if (inp) inp.classList.add('wrong-input'); }
+    retryQueue.push({ phraseIndex });
+  }
+  answered = true;
+  nextArea.classList.remove('hidden');
+  speak(correctText, IS_YOUNG ? 0.7 : 0.85);
+}
+
+/* ---------- LEVEL 5: КОНТЕКСТ ---------- */
+function renderLevel5(q, area) {
+  const phrase = phrases[q.phraseIndex];
+  const ctx = phrase.context;
+  const distractors = getRandomDistractors(q.phraseIndex, 3);
+  const options = shuffle([
+    { text: phrase.phrase, correct: true },
+    ...distractors.map(d => ({ text: phrases[d].phrase, correct: false }))
+  ]);
+
+  let dialogueHTML = '';
+  ctx.lines.forEach((line, i) => {
+    if (i === ctx.gapIndex) {
+      dialogueHTML += `<div class="dialogue-line"><span class="dialogue-speaker">${line.speaker}:</span> <span class="dialogue-gap" id="ctx-gap">______</span></div>`;
+    } else {
+      dialogueHTML += `<div class="dialogue-line"><span class="dialogue-speaker">${line.speaker}:</span> ${line.text}</div>`;
+    }
+  });
+
+  area.innerHTML = `
+    <div class="question-area">
+      <div class="question-prompt">Какая фраза подходит в диалог?</div>
+    </div>
+    <div class="context-dialogue" id="ctx-dialogue">${dialogueHTML}</div>
+    <div class="options-grid">
+      ${options.map(o => `<button class="option-btn" data-correct="${o.correct}" onclick="checkContextOption(this, ${q.phraseIndex}, \`${o.text.replace(/`/g,'')}\`)">${o.text}</button>`).join('')}
+    </div>
+    <div id="feedback-area"></div>
+    <div class="context-translation-toggle hidden" id="ctx-trans-toggle">
+      <button class="toggle-translation" onclick="toggleContextTranslation(${q.phraseIndex})">Показать перевод фразы</button>
+    </div>
+    <div class="next-btn-area hidden" id="next-btn-area">
+      <button class="btn btn-primary btn-lg" onclick="nextQuestion()">Далее →</button>
+    </div>
+  `;
+}
+
+function checkContextOption(btn, phraseIndex, chosenText) {
+  if (answered) return;
+  const isCorrect = btn.dataset.correct === 'true';
+  const phrase = phrases[phraseIndex];
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    btn.innerHTML += ' <span class="option-icon">✅</span>';
+    correctCount++;
+  } else {
+    btn.classList.add('wrong');
+    btn.innerHTML += ' <span class="option-icon"></span>';
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.dataset.correct === 'true') { b.classList.add('correct'); b.innerHTML += ' <span class="option-icon">✅</span>'; }
+    });
+    retryQueue.push({ phraseIndex });
+  }
+
+  const gapEl = document.getElementById('ctx-gap');
+  if (gapEl) { gapEl.textContent = phrase.phrase; gapEl.classList.add('filled'); }
+
+  const fbArea = document.getElementById('feedback-area');
+  fbArea.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct-fb' : 'wrong-fb'}">
+      <span class="fb-icon">${isCorrect ? '✅' : '❌'}</span> ${getEncouragement(isCorrect)}
+    </div>
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="speakDialogueLines(${phraseIndex})">🔊 Озвучить диалог</button>
+    </div>
+  `;
+  document.getElementById('ctx-trans-toggle').classList.remove('hidden');
+  answered = true;
+  document.getElementById('next-btn-area').classList.remove('hidden');
+}
+
+function speakDialogueLines(phraseIndex) {
+  const ctx = phrases[phraseIndex].context;
+  speakDialogue(ctx.lines);
+}
+
+function toggleContextTranslation(phraseIndex) {
+  const fbArea = document.getElementById('feedback-area');
+  const existing = fbArea.querySelector('.ctx-trans');
+  if (existing) { existing.remove(); return; }
+  const div = document.createElement('div');
+  div.className = 'ctx-trans';
+  div.style.cssText = 'margin-top:8px;font-size:0.95rem;color:var(--text-light);';
+  div.textContent = 'Перевод: ' + phrases[phraseIndex].translation;
+  fbArea.appendChild(div);
+}
+
+/* ================================================================
+   ✅ ПРОВЕРКА ВАРИАНТОВ (Уровни 1 и 2)
+   ================================================================ */
+function checkOption(btn, phraseIndex) {
+  if (answered) return;
+  answered = true;
+  const isCorrect = btn.dataset.correct === 'true';
+  const phrase = phrases[phraseIndex];
+
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    btn.innerHTML += ' <span class="option-icon">✅</span>';
+    correctCount++;
+  } else {
+    btn.classList.add('wrong');
+    btn.innerHTML += ' <span class="option-icon">❌</span>';
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.dataset.correct === 'true') { b.classList.add('correct'); b.innerHTML += ' <span class="option-icon">✅</span>'; }
+    });
+    retryQueue.push({ phraseIndex });
+  }
+
+  const fbArea = document.getElementById('feedback-area');
+  fbArea.innerHTML = `<div class="feedback ${isCorrect ? 'correct-fb' : 'wrong-fb'}"><span class="fb-icon">${isCorrect ? '✅' : '❌'}</span> ${getEncouragement(isCorrect)}</div>`;
+  speak(phrase.phrase, IS_YOUNG ? 0.7 : 0.85);
+  document.getElementById('next-btn-area').classList.remove('hidden');
+}
+
+/* ================================================================
+   ️ СЛЕДУЮЩИЙ ВОПРОС / РЕЗУЛЬТАТЫ
+   ================================================================ */
+function nextQuestion() {
+  questionIndex++;
+  renderQuestion();
+}
+
+function showResults() {
+  const total = currentQuestions.length;
+  const stars = calculateStars(correctCount, total);
+  setStars(currentLevel, stars);
+  showPage('page-results');
+  document.getElementById('results-title').textContent = `Уровень ${currentLevel} завершён!`;
+  document.getElementById('results-stars').innerHTML = [1,2,3].map(s =>
+    `<span style="color:${s <= stars ? 'var(--warning)' : '#ddd'};font-size:3.5rem;">★</span>`
+  ).join(' ');
+  document.getElementById('results-score').textContent = `${correctCount} из ${total} правильно`;
+  let msg = '';
+  if (stars === 3) msg = 'Отличная работа! Ты настоящий мастер! ';
+  else if (stars === 2) msg = 'Хороший результат! Продолжай тренироваться! 💪';
+  else msg = 'Не сдавайся! Попробуй ещё раз! 📚';
+  document.getElementById('results-message').textContent = msg;
+  const nextBtn = document.getElementById('next-level-btn');
+  if (currentLevel < 5) { nextBtn.classList.remove('hidden'); nextBtn.textContent = `➡️ Уровень ${currentLevel + 1}`; }
+  else { nextBtn.classList.add('hidden'); }
+}
+
+function retryLevel() { startLevel(currentLevel); }
+function goNextLevel() { if (currentLevel < 5) startLevel(currentLevel + 1); }
+
+/* ================================================================
+   🚀 ИНИЦИАЛИЗАЦИЯ
+   ================================================================ */
+document.addEventListener('DOMContentLoaded', () => { renderMenu(); });
+</script>
+</body>
+</html>
